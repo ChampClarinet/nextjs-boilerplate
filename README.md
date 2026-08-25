@@ -1,6 +1,8 @@
 # Next.js Boilerplate
 
-A reusable, domain-neutral Next.js application boilerplate for starting modern web projects with the conventions and tooling already configured.
+A reusable, domain-neutral Next.js application boilerplate built on a **Tailwind CSS + shadcn/ui foundation**, with modern development conventions and tooling already configured.
+
+Tailwind CSS provides the styling and semantic-token foundation, while local shadcn/ui primitives provide the primary UI component foundation. Consuming applications should normally build their product UI by composing and extending these foundations rather than introducing a parallel design system.
 
 The repository intentionally provides application foundations rather than product-specific business logic. New projects should extend the existing structure, design system, and development workflow instead of rebuilding those foundations from scratch.
 
@@ -108,17 +110,31 @@ Not every project needs every directory. Prefer the existing structure when an a
 
 ## Design System
 
-The boilerplate is design-system-driven.
+The boilerplate is design-system-driven and intentionally uses **Tailwind CSS + shadcn/ui as its UI foundation**.
 
 Before creating new UI:
 
 1. Inspect existing reusable components and local shadcn/ui primitives.
 2. Reuse or compose an existing component when possible.
-3. Use the semantic color tokens defined in `app/globals.css` rather than hardcoded colors.
-4. Preserve light, dark, and system theme compatibility.
-5. Keep product-specific UI inside the relevant module rather than promoting it to shared UI prematurely.
+3. Add missing shadcn/ui primitives when the product requires them rather than replacing the foundation with another component system.
+4. Use the semantic color tokens defined in `app/globals.css` rather than hardcoded colors.
+5. Preserve light, dark, and system theme compatibility.
+6. Keep product-specific UI inside the relevant module rather than promoting it to shared UI prematurely.
 
 The boilerplate should remain visually adaptable. Consuming projects are expected to replace CI/brand tokens without rewriting component implementations.
+
+## Source Comment Convention
+
+The source intentionally supports **Better Comments-style markers** as lightweight visual guidance in editors that support the convention:
+
+```ts
+//! Important warning or constraint.
+//? Explanation or implementation guidance.
+//* Highlighted context worth noticing.
+// TODO: Intentionally deferred work.
+```
+
+Keep useful markers when adapting the boilerplate. Comments should explain extension points, constraints, decisions, or non-obvious behavior rather than obvious syntax.
 
 ## Environment Files
 
@@ -170,9 +186,10 @@ When starting a product from this repository:
 1. Create or copy the project from the boilerplate.
 2. Replace project metadata and branding.
 3. Define the project's CI colors and semantic design tokens.
-4. Add only the infrastructure required by that product, such as authentication, API, database, or deployment integrations.
-5. Add business features under `src/modules` and wire route entry points through `app/`.
-6. Update the product README and changelog so they describe the resulting application rather than the boilerplate.
+4. Continue using the Tailwind CSS + shadcn/ui foundation unless the product has a deliberate reason to adopt another UI architecture.
+5. Add only the infrastructure required by that product, such as authentication, API, database, or deployment integrations.
+6. Add business features under `src/modules` and wire route entry points through `app/`.
+7. Update the product README and changelog so they describe the resulting application rather than the boilerplate.
 
 Avoid adding speculative infrastructure to this repository merely because a future project might need it. The goal is a small, current, reusable foundation that can be extended deliberately.
 
@@ -180,6 +197,7 @@ Avoid adding speculative infrastructure to this repository merely because a futu
 
 - Keep dependencies current and intentional.
 - Keep the boilerplate domain-neutral.
+- Preserve Tailwind CSS + shadcn/ui as the default UI foundation.
 - Prefer reusable foundations over example business features.
 - Avoid multiple competing patterns for the same concern.
 - Preserve readable, maintainable code over premature abstraction.
