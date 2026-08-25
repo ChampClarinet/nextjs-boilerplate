@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+branch_name=$(git symbolic-ref --short HEAD)
+
+# ❌ Block direct commits to main
+if [ "$branch_name" = "main" ]; then
+  echo "❌ Direct commits to main are not allowed. Please commit to release/* or hotfix/* branches and create a Pull Request."
+  exit 1
+fi
+
+# ✅ Enforce lint on protected branches
+if echo "$branch_name" | grep -Eq '^(main|develop|release/.*|hotfix/.*|deploy-to-[^-]+-server)$'; then
+  echo "🔍 Running bun lint before committing to $branch_name..."
+  if ! bun run lint; then
+    echo "❌ Lint failed. Commit blocked."
+    exit 1
+  fi
+else
+  echo "✅ Skipping lint: $branch_name is not protected."
+fi
+
+# ✅ Run lint-staged
+bunx lint-staged
+exit 0

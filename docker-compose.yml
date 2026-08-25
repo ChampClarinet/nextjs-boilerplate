@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+      args:
+        COMMIT_SHA: ${COMMIT_SHA:-}
+        BRANCH: ${BRANCH:-}
+    image: nextjs-boilerplate:${IMAGE_TAG:-latest}
+    container_name: nextjs_boilerplate
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_SERVER_LOOPBACK_URL: ${NEXT_PUBLIC_SERVER_LOOPBACK_URL:-http://127.0.0.1:3000}
+    ports:
+      - "${PORT:-3000}:3000"

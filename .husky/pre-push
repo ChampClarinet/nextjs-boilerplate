@@ -1,0 +1,29 @@
+#!/bin/sh
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+# ✅ Enforce lint before pushing protected branches
+
+if echo "$branch" | grep -Eq '^(main|develop|release/.*|hotfix/.*|deploy-to-[^-]+-server)$'; then
+echo "🔍 Running bun lint before pushing to $branch..."
+if ! bun lint; then
+echo "❌ Lint failed. Push blocked."
+exit 1
+fi
+fi
+
+# ✅ Version check before pushing to main
+
+if [ "$branch" = "main" ]; then
+echo "🔍 Checking version before pushing to main..."
+
+main_version=$(git show origin/main:package.json | grep '"version"' | head -1 | sed -E 's/.*"version": *"(.*)".*/\1/')
+  current_version=$(grep '"version"' package.json | head -1 | sed -E 's/._"version": *"(.*)"._/\1/')
+
+if [ "$main_version" = "$current_version" ]; then
+echo "❌ package.json version is still $current_version — must bump before pushing to main!"
+exit 1
+fi
+
+echo "✅ Version updated: $main_version → $current_version"
+fi
