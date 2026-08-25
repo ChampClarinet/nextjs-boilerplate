@@ -2,220 +2,207 @@
 
 ## Project Overview
 
-This repository is a Next.js + TypeScript frontend project using shadcn/ui, Tailwind CSS, Storybook, and Bun.
+This repository is a reusable, domain-neutral Next.js + TypeScript boilerplate.
 
-The UI is design-system-driven. Agents must treat existing Storybook stories, CI colors, and reusable components as the source of truth before creating or modifying UI.
+Its purpose is to provide a current application foundation, development workflow, and reusable UI conventions without coupling the codebase to any specific product, authentication provider, backend, database, or business domain.
+
+Agents must preserve that neutrality when changing the boilerplate itself. Product-specific infrastructure and business logic belong in consuming projects unless they are intentionally being promoted into the shared foundation.
 
 ## Core Principles
 
-- Follow the existing design system.
-- Prefer DRY, reusable, maintainable code.
-- Use CI colors and existing design tokens.
-- Follow atomic design structure where applicable.
+- Prefer readable, maintainable code over clever abstractions.
+- Reuse existing components, hooks, utilities, and patterns before creating new ones.
+- Keep the boilerplate domain-neutral.
+- Follow the existing design system and semantic color tokens.
 - Prefer composition over duplication.
-- Prefer improving the design system over bypassing it.
-- Break the design system only when there is a clear functional reason.
-- Avoid AI-generated one-off UI that does not match the repository style.
+- Avoid speculative infrastructure that only a future project might need.
+- Keep client components scoped to the smallest practical boundary; do not add `"use client"` unnecessarily.
+- Do not split trivial markup into standalone components unless the extraction improves reuse, readability, testing, or responsibility boundaries.
+- Avoid unrelated refactors while implementing a focused task.
 
 ## Tech Stack
 
-- Next.js
+The current boilerplate includes:
+
+- Next.js App Router
+- React
 - TypeScript
 - Bun
 - Tailwind CSS
-- shadcn/ui
-- React Context
-- react-hook-form for forms
+- shadcn/ui-style local primitives
+- Base UI and selected Radix primitives
+- next-themes
+- react-hook-form
+- TanStack React Table
+- ESLint
+- Prettier
+- Husky
+- lint-staged
+- Commitlint with Gitmoji conventional commits
+
+Do not introduce a new framework or competing library for an existing concern without a clear benefit.
 
 ## Important Commands
 
-Use Bun for project scripts.
+Use Bun for dependency management and project scripts.
 
 ```bash
-bun lint
+bun run dev
+bun run build
+bun run start
+bun run lint
+bun run check-types
+bun run format
 ```
 
-There is currently no required test command.
+There is currently no required automated test command. Consuming projects may add an appropriate test stack when their requirements justify it.
+
+Documentation-only work may skip lint and type checking when no executable source or configuration is changed.
 
 ## Repository Structure
 
-Main application routes are under:
+Main application routes live under:
 
-```txt
+```text
 app/
 ```
 
-Main source files are under:
+Shared source code lives under:
 
-```txt
+```text
 src/
 ```
 
-Reusable components are under:
+Common locations include:
 
-```txt
-src/components
+```text
+src/apis/                Shared API helpers when a project needs them
+src/components/atom/     Small reusable UI pieces
+src/components/molecules Composed reusable controls and patterns
+src/components/organisms Larger reusable UI sections
+src/components/ui/       Local shadcn/ui primitives and wrappers
+src/config/              Shared application configuration
+src/hooks/               Shared React hooks
+src/layout/              Reusable layout components
+src/lib/                 Shared libraries and helpers
+src/modules/             Product-specific feature modules
+src/providers/           Application-level providers
+src/utils/               Shared utility functions
 ```
 
-Component groups follow atomic design:
-
-```txt
-src/components/atom
-src/components/molecules
-src/components/organisms
-src/components/ui
-```
+Not every consuming project needs every directory. Prefer an existing appropriate location before introducing new top-level architecture.
 
 ## Decision Hierarchy
 
-When multiple solutions are possible, prefer:
+When multiple solutions are viable, prefer:
 
 1. Existing component
 2. Existing pattern
 3. Existing utility
 4. Existing hook
-5. New reusable abstraction
+5. Small reusable abstraction
 6. New implementation
+
+Do not create an abstraction only to satisfy this hierarchy. A direct implementation is preferable when reuse or separation would not improve the code.
 
 ## Expected Agent Workflow
 
-For UI tasks:
-
-1. Understand the requested page, module, or component.
-2. Inspect existing components in `src/components`.
-3. Reuse or compose existing atoms, molecules, organisms, layout, and shadcn components.
+1. Read the relevant route, module, component, and configuration before editing.
+2. Inspect existing reusable components and patterns.
+3. Confirm whether the change belongs in the boilerplate or only in a consuming product.
 4. Implement the smallest maintainable change.
-5. Follow Tailwind/shadcn styling conventions.
-6. Check whether documentation or `CHANGELOG.md` should be updated.
-7. Run:
-
-```bash
-bun lint
-```
-
-but can be skipped in docs only job.
-
-10. Summarize what changed and mention any intentional design-system deviation.
+5. Preserve existing architecture unless there is a clear reason to change it.
+6. Update documentation and `CHANGELOG.md` when required.
+7. Run relevant validation commands unless the task is documentation-only.
+8. Summarize the change, validation performed, and any remaining limitations.
 
 ## Architecture Principles
 
-- Prefer extending existing modules over creating new top-level folders.
 - Keep route entry points in `app/`.
-- Keep module-specific business logic inside `src/modules`.
+- Keep product-specific business logic inside `src/modules`.
 - Keep reusable UI inside `src/components`.
-- Keep shared utilities inside `src/utils`.
 - Keep shared hooks inside `src/hooks`.
-- Keep utility functions pure whenever possible.
+- Keep shared utilities pure whenever practical.
 - Avoid circular dependencies.
 - Prefer composition over inheritance.
-- Avoid mixing data fetching, state, layout, and low-level UI in one large component.
+- Avoid components that unnecessarily mix data fetching, state orchestration, layout, and low-level UI.
+- Do not create parallel architectural patterns for the same concern without an explicit migration plan.
+- Server Components are preferred where practical; introduce Client Components only when browser APIs, event handlers, client state, or client-only libraries require them.
 
 ## Component Rules
 
-Before creating a new component:
+Before creating a component:
 
-1. Search `src/components` for an existing atom, molecule, organism, layout, or shadcn component.
-2. Prefer extending or composing existing components.
-3. Do not duplicate components from old code or nearby files.
-4. Keep components small and focused.
-5. Put reusable UI in `src/components`.
-6. Put page/module-specific UI inside the related `src/modules/<module-name>` folder.
+1. Search `src/components` and the relevant module for an existing implementation.
+2. Prefer extending or composing existing primitives.
+3. Keep genuinely reusable UI in `src/components`.
+4. Keep module-specific UI close to its feature under `src/modules/<module-name>`.
+5. Extract a component only when it creates a meaningful responsibility boundary or reuse opportunity.
 
-Use this rough boundary:
+Use these rough boundaries:
 
 - `src/components/atom`: smallest reusable UI pieces.
-- `src/components/molecules`: combinations of atoms or shadcn components.
+- `src/components/molecules`: combinations of primitives or atoms.
 - `src/components/organisms`: larger reusable UI sections.
-- `src/layout`: layout-level reusable components.
-- `src/components/ui`: shadcn/ui primitives and wrappers.
-- `src/modules`: feature/module-specific implementation.
+- `src/components/ui`: local shadcn/ui primitives and wrappers.
+- `src/layout`: reusable layout-level components.
+- `src/modules`: consuming-product feature implementations.
 
-## Styling Rules
+Atomic design is a guide, not a requirement to split every visual fragment into its own file.
 
-Prefer Tailwind CSS and shadcn/ui.
+## Styling and Design-System Rules
+
+Prefer Tailwind CSS and the existing local component primitives.
 
 Do:
 
-- Use Tailwind utility classes.
-- Use shadcn/ui components where possible.
-- Use CI colors and existing tokens.
-- Use `grid` and `flex` for layout.
-- Keep class names readable.
-- Extract repeated class patterns into reusable components or utilities when it improves maintainability.
+- Use semantic design tokens and CSS variables.
+- Preserve light, dark, and system theme compatibility.
+- Use Tailwind utility classes for layout and styling.
+- Prefer `grid` and `flex` for normal layout.
+- Keep repeated styling centralized when doing so improves consistency.
+- Treat CI/brand colors as replaceable tokens rather than component-level constants.
 
 Avoid:
 
-- Hardcoded colors.
-- Inline styles.
-- Magic numbers.
-- Duplicated layout logic.
-- Absolute positioning unless necessary.
+- Hardcoded hex, rgb, hsl, or arbitrary color values when a semantic token fits.
+- Inline styles without a functional reason.
+- Duplicated spacing or layout systems.
+- Fixed pixel-heavy layouts that harm responsiveness.
+- Absolute positioning for ordinary document layout.
 
-Absolute positioning is acceptable only when the UI genuinely requires layering or overlay behavior.
-
-## Color and CI Rules
-
-CI colors are part of the design system.
-
-Before using a color:
-
-1. Check `app/globals.css` for existing color system.
-2. Check existing components for color usage.
-3. Prefer tokens/classes already used in the project.
-4. Do not hardcode hex, rgb, hsl, or arbitrary Tailwind color values unless necessary.
-
-If a new color is required, document why and keep usage centralized.
-
-## Layout Rules
-
-Prefer:
-
-- `flex`
-- `grid`
-- responsive Tailwind utilities
-- reusable layout components
-
-Avoid:
-
-- absolute positioning for normal layout
-- fixed pixel-heavy layouts
-- duplicated spacing systems
-- inline layout styles
+If a consuming project changes brand colors, update the centralized design tokens rather than rewriting component implementations.
 
 ## shadcn/ui Rules
 
-Existing shadcn components live in:
+Local shadcn/ui primitives live under:
 
-```txt
-src/components/shadcn
+```text
+src/components/ui
 ```
 
-Before adding a new shadcn component:
+Before adding a primitive:
 
-1. Check if it already exists.
-2. Use the existing local shadcn component if available.
-3. If a required shadcn component is missing, it may be added.
-4. Keep new shadcn components consistent with the existing local setup.
+1. Check whether it already exists locally.
+2. Reuse the local component when available.
+3. Add a missing shadcn/ui primitive only when the feature requires it.
+4. Keep new primitives consistent with the repository's existing setup and tokens.
 
-Do not install unrelated UI libraries unless there is a strong reason.
+Do not install unrelated UI libraries merely to avoid composing existing components.
 
 ## Form Rules
 
-Use `react-hook-form` for form state and validation flow.
+Use `react-hook-form` for non-trivial client-side forms unless a consuming project intentionally adopts another pattern.
 
-Prefer existing form patterns from nearby modules before introducing new structure.
-
-Keep form components composable and avoid deeply coupling form state to unrelated UI.
+Prefer nearby reusable field and validation patterns before introducing new abstractions. Keep form state scoped to the form and avoid coupling it to unrelated presentation components.
 
 ## Import Rules
 
-Prefer importing through existing aliases.
+Prefer configured aliases over deep relative imports.
 
-Avoid deep relative imports when an alias exists.
+Group imports consistently:
 
-Group imports:
-
-1. React
+1. React and framework imports
 2. Third-party packages
 3. Internal aliases
 4. Relative imports
@@ -224,71 +211,55 @@ Remove unused imports before finishing.
 
 ## File and Naming Rules
 
-Follow nearby file naming conventions.
+Follow nearby naming conventions.
 
-Current component folders commonly use:
+Keep related files close to the component or module they belong to. Do not move files unless the move clearly improves the architecture or is part of an intentional migration.
 
-```txt
-index.tsx
-<component-name>.stories.tsx
-```
-
-Keep files close to the component or module they belong to.
-
-Do not move files unless it clearly improves structure.
+Prefer descriptive names over generic names such as `helper`, `data`, or `utils2` when the responsibility can be expressed more clearly.
 
 ## Performance Guidelines
 
 - Avoid unnecessary re-renders.
-- Prefer memoization only when justified.
-- Do not prematurely optimize.
-- Avoid duplicate API calls.
-- Reuse existing hooks whenever possible.
+- Do not add memoization without evidence or a clear reason.
+- Avoid duplicate network requests.
+- Prefer server-side data loading when it naturally fits the route and interaction model.
+- Keep client-side state local unless state genuinely needs to be shared.
+- Do not introduce global state management preemptively.
 
-## Working With Existing Code
+## Environment and Secrets
 
-When modifying existing code:
-
-1. Read the existing component/module first.
-2. Preserve the current architecture unless there is a clear reason to change it.
-3. Prefer minimal, focused changes.
-4. Avoid unrelated refactors.
-5. Keep public component APIs stable when possible.
-6. Update stories if visual behavior changes.
-7. Run lint before finishing.
+- Never commit credentials, private keys, access tokens, database passwords, or production secrets.
+- Document introduced environment variable names in `.env.example`.
+- Keep provider-specific environment configuration in consuming projects unless it is genuinely part of the reusable foundation.
+- Do not hardcode deployment domains or service endpoints into reusable code.
 
 ## Documentation and Changelog Rules
 
-Agents must keep project documentation aligned with meaningful code changes.
+Agents must keep repository documentation aligned with meaningful changes.
 
 ### When to Update `CHANGELOG.md`
 
 Update `CHANGELOG.md` when a change is user-visible, contributor-visible, architectural, or operationally meaningful.
 
-Examples that should update the changelog:
+Examples include:
 
-- New route, page, module, or major UI section.
-- New reusable component, design-system pattern, or Storybook coverage.
-- Significant behavior change.
-- API integration or authentication flow change.
-- State management structure change.
-- Build, deployment, Docker, PWA, or environment variable change.
-- Bug fix that affects user behavior or developer workflow.
-- Documentation change that affects onboarding or contribution workflow.
+- New route, page, module, reusable component, or major UI section.
+- Significant behavior or architecture changes.
+- API, authentication, state-management, build, deployment, Docker, PWA, or environment changes.
+- Bug fixes that affect users or developer workflow.
+- Documentation changes that materially affect onboarding or contribution workflow.
 
-Minor internal refactors do not need a changelog entry unless they affect architecture, maintainability, or public behavior.
+Minor internal refactors do not require a changelog entry unless they materially affect maintainability, architecture, or public behavior.
 
 ### Where to Write Changelog Entries
 
-Add new entries under:
+Add unreleased entries under:
 
 ```md
 ## [Unreleased]
 ```
 
-While changes are unreleased, group entries by **sprint date first**, then by changelog category.
-
-Use this structure:
+Group unreleased entries by sprint date first, then category:
 
 ```md
 ## [Unreleased]
@@ -306,147 +277,64 @@ Use this structure:
 #### Known Gaps
 ```
 
-Use the sprint date associated with the work, not the date the changelog happens to be edited.
+Only include category headings that have entries. Keep sprint sections newest to oldest and do not create duplicate sections for the same sprint date.
 
-If an entry belongs to an existing sprint section, add it to that section instead of creating a duplicate sprint section.
+Use the sprint date associated with the work, not merely the date the changelog was edited.
 
-If the sprint section does not exist yet, create it under `[Unreleased]`.
+### Changelog Categories
 
-Within each sprint, use the existing categories when possible:
-
-- `Added`
-- `Changed`
-- `Fixed`
-- `Documentation`
-- `Known Gaps`
-
-Only include category headings that have entries. Do not create empty category sections.
-
-Keep sprint sections ordered from newest to oldest.
-
-Choose the category by intent:
-
-- `Added`: new capability, route, component, story, feature, script, or documentation file.
+- `Added`: new capability, route, component, feature, script, or documentation file.
 - `Changed`: changed behavior, structure, workflow, styling convention, or implementation approach.
-- `Fixed`: bug fixes and resolved incorrect behavior.
-- `Documentation`: README, AGENTS, docs, comments, or contributor guidance.
-- `Known Gaps`: intentionally incomplete behavior, placeholders, TODO-level limitations, or integration gaps.
-
-### Keep Sprint Entries Compact
-
-Do not let the current sprint become a running log of every small implementation change.
-
-While a sprint is active, preserve useful detail, but compact entries when they start becoming repetitive, fragmented, or overly numerous.
-
-When compacting:
-
-- Merge related entries that describe the same feature, module, workflow, or outcome.
-- Prefer one meaningful summary over several file-level or step-level bullets.
-- Preserve distinct behavior changes, fixes, architectural decisions, and known gaps when they are independently useful.
-- Remove implementation noise that does not help a future maintainer understand what changed.
-- Do not merge unrelated changes merely to reduce the number of bullets.
-
-Prefer:
-
-```md
-- Added and refined employee selection for stock transactions, including searchable employee metadata and validation.
-```
-
-Instead of:
-
-```md
-- Added employee autocomplete.
-- Added employee option rendering.
-- Added employee ID display.
-- Updated employee selection validation.
-- Adjusted employee autocomplete styling.
-```
-
-Agents may compact the current sprint opportunistically when updating `CHANGELOG.md`; do not wait until release cleanup if the section is already becoming noisy.
+- `Fixed`: corrected behavior or developer workflow.
+- `Documentation`: README, AGENTS, contributor guidance, or other documentation changes.
+- `Known Gaps`: intentionally incomplete behavior, placeholders, or integration gaps.
 
 ### Changelog Writing Style
 
-Keep entries:
+Keep entries short, specific, and focused on impact rather than file-level implementation noise. Merge repetitive bullets that describe the same outcome.
 
-- Short and specific.
-- Written in past tense.
-- Focused on impact, not implementation noise.
-- Useful to future maintainers.
-- Grouped by feature or area when possible.
+Write entries in past tense where practical.
 
-Prefer:
+Before finishing a task, check whether a changelog update is required. If a meaningful code, architecture, design-system, documentation, or workflow change was made, update the changelog in the same change set.
 
-```md
-- Added Storybook coverage for `FaceCard` loading and empty states.
-- Fixed OAuth callback redirect to use the authenticated landing route.
-- Clarified design-system workflow in `README.md`.
-```
+## Git and Commit Rules
 
-Avoid:
+Use the repository's Gitmoji + Conventional Commit format. Follow the configured Commitlint rules rather than inventing a different commit style.
 
-```md
-- Changed stuff.
-- Fixed bugs.
-- Updated files.
-- Refactored code.
-```
-
-### Changelog Responsibility
-
-Before finishing a task, agents must check whether `CHANGELOG.md` should be updated.
-
-If the changelog is not updated, the final response should briefly explain why it was not necessary.
-
-If the task includes meaningful code, design-system, architecture, documentation, or workflow changes, update `CHANGELOG.md` in the same change set.
-
-## When Breaking the Design System Is Allowed
-
-Breaking existing patterns is allowed only when necessary.
-
-If doing so, agents must explain:
-
-- What existing pattern was insufficient.
-- Why the deviation was needed.
-- Whether the deviation should become part of the design system later.
-
-Prefer improving the design system over bypassing it.
+Do not bypass protected-branch hooks or validation unless the user explicitly directs repository-history maintenance outside the normal workflow.
 
 ## Anti-Patterns
 
 Do not:
 
-- Duplicate UI from another folder.
-- Copy old components into a new location instead of importing/reusing them.
-- Create one-off components when existing design-system components fit.
-- Hardcode colors.
-- Use inline styles without necessity.
-- Add a new state management pattern.
-- Add a new UI library without strong justification.
-- Overuse absolute positioning.
-- Ignore Storybook.
-- Break CI color usage for convenience.
-- Create large components that mix data fetching, state, layout, and UI details unnecessarily.
+- Add product-specific business rules to the shared boilerplate without an explicit reason.
+- Duplicate components that already exist.
+- Create tiny one-off components that add indirection without value.
+- Add `"use client"` to files that do not require client behavior.
+- Hardcode brand colors inside reusable components.
+- Introduce a new state-management or UI library without strong justification.
+- Add speculative backend, database, authentication, or deployment infrastructure to the boilerplate.
+- Mix unrelated refactors into a focused task.
+- Create large components that combine unrelated responsibilities.
+- Leave documentation describing removed or product-specific behavior.
 
 ## Final Check
 
 Before completing work, verify:
 
-- Existing components were reused where possible.
-- No unnecessary hardcoded styles were added.
-- CI colors and design tokens were followed.
-- Layout uses grid/flex unless layering is required.
-- Storybook remains accurate.
-- `CHANGELOG.md` was updated when needed.
-- `bun lint` passes or known lint failures are explained.
+- Existing reusable code was used where appropriate.
+- The boilerplate remains domain-neutral unless the task explicitly changes that goal.
+- No unnecessary Client Components or abstractions were introduced.
+- Semantic design tokens were preserved.
+- Documentation and changelog entries are current.
+- Relevant lint, type, build, or other validation passed, or known failures are explained.
 
 ## Final Response Format
 
 When finishing a task, summarize:
 
 - What changed
-- Reused components
-- New components, if any
-- Storybook updates
+- Relevant reuse or architectural decisions
+- Validation performed
 - Changelog updates
-- Design-system deviations
-- Remaining TODOs
+- Intentional deviations or remaining TODOs
