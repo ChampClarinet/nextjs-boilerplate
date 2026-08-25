@@ -14,14 +14,14 @@ ENV HUSKY=0
 
 ARG COMMIT_SHA
 ARG BRANCH
-ARG VIP_ADMIN_ENV_FILE=.env.production
+ARG ENV_FILE=.env.production
 
 ENV COMMIT_SHA=${COMMIT_SHA}
 ENV BRANCH=${BRANCH}
 
 COPY . .
 
-RUN if [ "${VIP_ADMIN_ENV_FILE}" != ".env.production" ]; then cp "${VIP_ADMIN_ENV_FILE}" .env.production; fi
+RUN if [ "${ENV_FILE}" != ".env.production" ]; then cp "${ENV_FILE}" .env.production; fi
 RUN bun run prebuild
 RUN bun run build
 RUN bun prune --production

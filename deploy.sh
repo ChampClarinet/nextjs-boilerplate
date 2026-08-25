@@ -6,7 +6,7 @@ set -euo pipefail
 # Configuration
 # ---------------------------------------------------------------------------
 
-base_name="vip-admin-ui-web"
+base_name="nextjs-boilerplate"
 
 environment="production"
 env_file=".env.production"
@@ -215,7 +215,7 @@ docker_build_args=(
   --platform=linux/amd64
   --build-arg "COMMIT_SHA=$commit_id"
   --build-arg "BRANCH=$branch_name"
-  --build-arg "VIP_ADMIN_ENV_FILE=$env_file"
+  --build-arg "ENV_FILE=$env_file"
   -t "$image_name"
 )
 

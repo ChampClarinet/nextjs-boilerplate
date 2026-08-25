@@ -1,9 +1,9 @@
 {
-  "name": "vip-admin-ui",
-  "version": "0.1.0",
+  "name": "nextjs-boilerplate",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "bun --bun next dev --port 5173",
+    "dev": "bun --bun next dev",
     "prebuild": "bun scripts/generate-sw-version.mjs",
     "build": "cross-env IS_BUILD=true bun --bun next build",
     "start": "bun --bun next start",

@@ -143,7 +143,7 @@ The app expects these variables to exist:
 | `NEXT_PUBLIC_SERVER_LOOPBACK_URL` | Production runtime | Internal loopback URL used by server actions to call local auth routes |
 | `COMMIT_SHA`                      | Optional build arg | Fallback used when Git metadata is unavailable during builds           |
 | `BRANCH`                          | Optional build arg | Fallback used when Git metadata is unavailable during builds           |
-| `VIP_ADMIN_ENV_FILE`              | Optional build arg | Environment file selected for the Docker build                         |
+| `ENV_FILE`                        | Optional build arg | Environment file selected for the Docker build                         |
 | `IS_BUILD`                        | Build-time         | Set by the build script to adjust loopback behavior during Next build  |
 
 ## Local Development
@@ -242,7 +242,7 @@ Show deployment options:
 ./deploy.sh --help
 ```
 
-For Docker deployments, the application runs on port `3000` inside the container. `docker-compose.yml` exposes it through `VIP_ADMIN_PORT`.
+For Docker deployments, the application runs on port `3000` inside the container. `docker-compose.yml` exposes it through `PORT`.
 
 ## Quality Checklist
 
