@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-This repository is a reusable, domain-neutral Next.js + TypeScript boilerplate.
+This repository is a reusable, domain-neutral Next.js + TypeScript boilerplate built on a **Tailwind CSS + shadcn/ui foundation**.
+
+Tailwind CSS provides the styling and design-token layer, while local shadcn/ui primitives provide the primary component foundation. Build product UI by composing and extending that foundation rather than introducing a parallel design system.
 
 Its purpose is to provide a current application foundation, development workflow, and reusable UI conventions without coupling the codebase to any specific product, authentication provider, backend, database, or business domain.
 
@@ -13,6 +15,7 @@ Agents must preserve that neutrality when changing the boilerplate itself. Produ
 - Prefer readable, maintainable code over clever abstractions.
 - Reuse existing components, hooks, utilities, and patterns before creating new ones.
 - Keep the boilerplate domain-neutral.
+- Treat Tailwind CSS + shadcn/ui as the default UI foundation.
 - Follow the existing design system and semantic color tokens.
 - Prefer composition over duplication.
 - Avoid speculative infrastructure that only a future project might need.
@@ -152,6 +155,8 @@ Atomic design is a guide, not a requirement to split every visual fragment into 
 
 ## Styling and Design-System Rules
 
+This boilerplate is intentionally built from a **Tailwind CSS + shadcn/ui foundation**. Treat these as the default styling and component architecture for consuming applications.
+
 Prefer Tailwind CSS and the existing local component primitives.
 
 Do:
@@ -159,6 +164,7 @@ Do:
 - Use semantic design tokens and CSS variables.
 - Preserve light, dark, and system theme compatibility.
 - Use Tailwind utility classes for layout and styling.
+- Compose local shadcn/ui primitives before creating custom replacements.
 - Prefer `grid` and `flex` for normal layout.
 - Keep repeated styling centralized when doing so improves consistency.
 - Treat CI/brand colors as replaceable tokens rather than component-level constants.
@@ -170,6 +176,7 @@ Avoid:
 - Duplicated spacing or layout systems.
 - Fixed pixel-heavy layouts that harm responsiveness.
 - Absolute positioning for ordinary document layout.
+- Introducing a second component/design-system foundation alongside shadcn/ui without an explicit architectural reason.
 
 If a consuming project changes brand colors, update the centralized design tokens rather than rewriting component implementations.
 
@@ -189,6 +196,29 @@ Before adding a primitive:
 4. Keep new primitives consistent with the repository's existing setup and tokens.
 
 Do not install unrelated UI libraries merely to avoid composing existing components.
+
+## Comment Conventions
+
+This repository intentionally uses **Better Comments-style markers** in source comments. Preserve these markers when they communicate useful intent; do not normalize or remove them merely for stylistic consistency.
+
+Use them purposefully:
+
+```ts
+//! Important warning, constraint, or behavior that is easy to misuse.
+//? Explanation, implementation guidance, or a decision that may not be obvious from the code.
+//* Highlighted context or noteworthy implementation detail.
+// TODO: Work that is intentionally deferred and should be implemented later.
+```
+
+Examples in boilerplate code should remain provider- and product-neutral:
+
+```ts
+//? Add authentication logic for the consuming application here.
+//! Never expose server-only credentials through client-accessible environment variables.
+//* Keep this boundary provider-agnostic so consuming projects can choose their own implementation.
+```
+
+Comments should explain **why, constraints, extension points, or non-obvious behavior**. Do not comment obvious syntax, and do not leave inherited product-specific notes in reusable boilerplate code.
 
 ## Form Rules
 
@@ -317,6 +347,7 @@ Do not:
 - Mix unrelated refactors into a focused task.
 - Create large components that combine unrelated responsibilities.
 - Leave documentation describing removed or product-specific behavior.
+- Remove purposeful Better Comments markers merely to normalize comment style.
 
 ## Final Check
 
@@ -324,7 +355,9 @@ Before completing work, verify:
 
 - Existing reusable code was used where appropriate.
 - The boilerplate remains domain-neutral unless the task explicitly changes that goal.
+- Tailwind CSS + shadcn/ui remain the default UI foundation unless the task explicitly changes that architecture.
 - No unnecessary Client Components or abstractions were introduced.
+- Purposeful Better Comments markers were preserved.
 - Semantic design tokens were preserved.
 - Documentation and changelog entries are current.
 - Relevant lint, type, build, or other validation passed, or known failures are explained.
