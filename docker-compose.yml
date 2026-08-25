@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+      args:
+        COMMIT_SHA: ${COMMIT_SHA:-}
+        BRANCH: ${BRANCH:-}
+    image: vip-admin-ui-web:${VIP_ADMIN_IMAGE_TAG:-latest}
+    container_name: vip_admin_ui_web
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_SERVER_LOOPBACK_URL: ${NEXT_PUBLIC_SERVER_LOOPBACK_URL:-http://127.0.0.1:3000}
+    ports:
+      - "${VIP_ADMIN_PORT:-3000}:3000"
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vip_admin_ui_web.rule=Host(`backoffice-dev-vip.selen.ai`)"
+      - "traefik.http.routers.vip_admin_ui_web.entrypoints=websecure"
+      - "traefik.http.routers.vip_admin_ui_web.tls=true"
+      - "traefik.http.routers.vip_admin_ui_web.tls.certresolver=cloudflare"
+      - "traefik.http.services.vip_admin_ui_web.loadbalancer.server.port=3000"
+
+    networks:
+      - frappe-main-framwork_default
+
+networks:
+  frappe-main-framwork_default:
+    name: "frappe-main-framwork_default"
+    external: true
