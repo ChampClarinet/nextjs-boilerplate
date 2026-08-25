@@ -1,266 +1,188 @@
-# VIP Admin UI
+# Next.js Boilerplate
 
-VIP Admin UI is a Next.js frontend for security service administration workflows. It provides the authenticated admin shell, Frappe OAuth login integration, shared layout/navigation, and the route structure for VIP operational modules.
+A reusable, domain-neutral Next.js application boilerplate for starting modern web projects with the conventions and tooling already configured.
 
-The current repository is early-stage but no longer a generic `create-next-app` scaffold. Treat the product surface as VIP Admin and keep new work aligned with the existing App Router, shadcn-style primitives, Tailwind utilities, and Frappe-backed authentication flow.
+The repository intentionally provides application foundations rather than product-specific business logic. New projects should extend the existing structure, design system, and development workflow instead of rebuilding those foundations from scratch.
 
-## Current Status
+## Included Stack
 
-VIP Admin UI is an active frontend application focused on authenticated security service management.
-
-Currently implemented:
-
-- Frappe OAuth authorization-code login entry point.
-- OAuth callback route that exchanges the code for access, refresh, and ID tokens.
-- Cookie-backed auth storage for access, refresh, and ID tokens.
-- Authenticated App Router layout that loads the current Frappe OpenID profile.
-- Token refresh support for server-side profile loading and client-side Axios requests.
-- Logout route and navbar sign-out action that clear auth cookies and return to `/login`.
-- Authenticated application shell with collapsible sidebar, navbar, theme toggle, user affordance, and padded main content area.
-- Shared scroll handling for authenticated pages through `PageScroll`.
-- Reusable atom components for status indicators, no-data placeholders, and toggle badges.
-- Reusable molecule components for search, loading dialogs, comboboxes, date pickers, and date-range pickers.
-- Reusable TanStack-backed data table organism with pagination and empty-state handling.
-- Expanded shadcn-style primitive set for badges, calendar, cards, checkbox, command menu, dialog, input groups, popover, scroll area, select, spinner, table, tabs, and textarea.
-- Protected `/stock` module with stock management, stock transactions, and stock reporting workflows.
-- Stock summary cards for product types, total items, borrowed items, and below-minimum items.
-- Stock filtering by opening date, search text, category, and below-minimum status.
-- Stock table showing product, category, available/total, stock status, opening, incoming, outgoing, and current counts.
-- Sidebar route configuration for VIP Admin modules:
-  - `/visitor-management`
-  - `/patrol-management`
-  - `/human-resources`
-  - `/shift-attendance`
-  - `/training-course`
-  - `/stock`
-  - `/check-billing`
-  - `/payroll`
-- Root redirect flow:
-  - unauthenticated users go to `/login`
-  - authenticated users go to `/home`
-  - `/home` redirects to `/stock`
-- Docker deployment script for validated image builds and Compose-based deployment.
-- Build metadata generation through `public/version.json`.
-
-Currently partial or scaffolded:
-
-- Sidebar module routes other than `/stock` are navigation targets, but their page implementations are not present in the repository yet.
-- The navbar user label is static (`Super Admin`) even though the authenticated Frappe user profile is available in context.
-- The production Traefik labels in `docker-compose.yml` are placeholders pending backend/infrastructure confirmation.
-- There is no `.env.example` in the repository today, so required environment values must be supplied manually.
-- There is no dedicated test script in `package.json`.
-
-## Product Surface
-
-### Authentication
-
-The app uses Frappe OAuth:
-
-1. The public login page builds an OAuth authorize URL from the incoming request origin.
-2. The login button redirects the user to the Frappe OAuth authorize endpoint.
-3. Frappe redirects back to `/auth/callback` with an authorization code.
-4. The local callback route exchanges that code at the Frappe token endpoint.
-5. Access, refresh, and ID tokens are stored in cookies.
-6. Authenticated layouts call the Frappe OpenID profile endpoint before rendering protected content.
-7. Expired tokens are refreshed through `/auth/refresh-token`.
-8. Invalid or expired sessions are cleared and redirected to `/login`.
-
-### Main Modules
-
-The sidebar defines the intended VIP Admin modules:
-
-- `Visitor Management`
-- `Patrol Management`
-- `Human Resources`
-- `Shift & Attendance`
-- `Training Course`
-- `Stock`
-- `Check & Billing`
-- `Payroll`
-
-Currently implemented:
-
-- `Stock`: security equipment inventory workflows covering stock management, stock transactions, and stock reports.
-
-The default authenticated landing route is:
-
-```text
-/stock
-```
-
-## Tech Stack
-
-- Next.js App Router
-- React
-- TypeScript
+- Next.js 16 App Router
+- React 19
+- TypeScript with strict configuration
 - Bun for package management and script execution
-- Tailwind CSS
-- shadcn/ui style primitives
-- Base UI
-- Radix Checkbox
+- Tailwind CSS 4
+- shadcn/ui-style local primitives
+- Base UI and selected Radix primitives
+- next-themes for light, dark, and system themes
+- react-hook-form for forms
 - TanStack React Table
 - React DayPicker with Buddhist calendar support
-- cmdk command menu primitives
 - date-fns
-- lucide-react icons
-- next-themes-compatible local theme provider
-- React Context for authenticated user state
-- Axios for client-side API calls
-- Frappe OAuth/OpenID backend integration
+- Lucide icons
+- Motion
+- Sonner notifications
+- ESLint
+- Prettier with import and Tailwind class sorting
+- Husky and lint-staged
+- Commitlint with Gitmoji conventional commits
+- Docker build support
+- Build metadata generation
 
-## Project Structure
+Product-specific integrations such as authentication providers, databases, API clients, state management, or backend frameworks should be added by the consuming project when required.
 
-```text
-app/                     Next.js app router pages, layouts, and auth routes
-src/apis/                Client and server API helpers
-src/components/atom/     Small reusable UI elements
-src/components/molecules Combined reusable controls and UI patterns
-src/components/organisms Navbar, sidebar, data table, and larger UI sections
-src/components/ui/       Local shadcn-style primitives
-src/config/              Auth, redirect, and sidebar configuration
-src/features/auth/       Auth cookie keys and user context
-src/hooks/               Shared React hooks
-src/layout/              Shared authenticated layout and page scrolling
-src/lib/                 General library helpers
-src/modules/             Product modules and feature-specific UI
-src/providers/           App-level providers
-src/utils/               Utility helpers
-public/                  Static assets and generated version metadata
-scripts/                 Build-time scripts
-```
+## Requirements
 
-Module implementations live under `src/modules/<module-name>` and are wired into protected App Router pages under `app/(auth)/<route>/page.tsx`.
+- Bun 1.4.0 or newer
+- A runtime compatible with the current Next.js version
 
-## Environment Variables
+The repository declares Bun as its package manager and should not introduce npm, pnpm, or Yarn lockfiles.
 
-The app expects these variables to exist:
+## Getting Started
 
-| Variable                          | Required           | Purpose                                                                |
-| --------------------------------- | ------------------ | ---------------------------------------------------------------------- |
-| `NEXT_PUBLIC_FRAPPE_API_URL`      | Yes                | Base URL for Frappe OAuth, OpenID profile, and API calls               |
-| `NEXT_PUBLIC_CLIENT_ID`           | Yes                | Frappe OAuth client ID                                                 |
-| `NEXT_PUBLIC_CLIENT_URL`          | Yes                | Public app URL used as the OAuth callback redirect base                |
-| `NEXT_PUBLIC_SERVER_LOOPBACK_URL` | Production runtime | Internal loopback URL used by server actions to call local auth routes |
-| `COMMIT_SHA`                      | Optional build arg | Fallback used when Git metadata is unavailable during builds           |
-| `BRANCH`                          | Optional build arg | Fallback used when Git metadata is unavailable during builds           |
-| `ENV_FILE`                        | Optional build arg | Environment file selected for the Docker build                         |
-| `IS_BUILD`                        | Build-time         | Set by the build script to adjust loopback behavior during Next build  |
-
-## Local Development
-
-### Prerequisites
-
-- Node.js 24+
-- Bun 1.3.x
-
-### Install
+Install dependencies:
 
 ```bash
 bun install
 ```
 
-### Run The App
+Start the development server:
 
 ```bash
 bun run dev
 ```
 
-The app runs on:
+Create a production build:
+
+```bash
+bun run build
+```
+
+Start the production server:
+
+```bash
+bun run start
+```
+
+## Quality Commands
+
+Run linting:
+
+```bash
+bun run lint
+```
+
+Run TypeScript validation:
+
+```bash
+bun run check-types
+```
+
+Format the repository:
+
+```bash
+bun run format
+```
+
+There is currently no dedicated automated test command. Consuming projects may introduce a test stack when their requirements justify it.
+
+## Project Structure
 
 ```text
-http://localhost:5173
+app/                     Next.js App Router routes and layouts
+src/components/          Reusable application components
+src/components/atom/     Small reusable UI pieces
+src/components/molecules Composed reusable controls and patterns
+src/components/organisms Larger reusable UI sections
+src/components/ui/       Local shadcn/ui primitives and wrappers
+src/hooks/               Shared React hooks
+src/layout/              Shared layout components
+src/lib/                 Shared libraries and helpers
+src/modules/             Product-specific modules added by consuming apps
+src/providers/           Application-level providers
+src/utils/               Shared utility functions
+public/                  Static assets and generated build metadata
+scripts/                 Build-time and repository scripts
 ```
 
-### Useful Scripts
+Not every project needs every directory. Prefer the existing structure when an appropriate location already exists, and add new top-level architecture only when the project genuinely requires it.
 
-```bash
-bun run dev
-bun run build
-bun run start
-bun run lint
-bun run check-types
-bun run format
-bun run commit
-```
+## Design System
 
-## Build And Deployment
+The boilerplate is design-system-driven.
 
-### Production Build
+Before creating new UI:
 
-```bash
-bun run build
-bun run start
-```
+1. Inspect existing reusable components and local shadcn/ui primitives.
+2. Reuse or compose an existing component when possible.
+3. Use the semantic color tokens defined in `app/globals.css` rather than hardcoded colors.
+4. Preserve light, dark, and system theme compatibility.
+5. Keep product-specific UI inside the relevant module rather than promoting it to shared UI prematurely.
 
-The build automatically runs:
+The boilerplate should remain visually adaptable. Consuming projects are expected to replace CI/brand tokens without rewriting component implementations.
+
+## Environment Files
+
+The repository includes environment templates for development and production workflows.
+
+Keep secrets and machine-specific values out of version control. When a consuming project introduces environment variables, document their names and purpose in `.env.example` and in that project's README when appropriate.
+
+Do not commit credentials, private keys, access tokens, database passwords, or production secrets.
+
+## Build Metadata
+
+`bun run build` runs the `prebuild` script:
 
 ```text
 scripts/generate-sw-version.mjs
 ```
 
-This creates:
+The script generates build metadata used by the application, including `public/version.json`.
 
-- `public/version.json`
+## Docker
 
-`version.json` includes the app version, commit SHA, branch, and build timestamp.
+A `Dockerfile` is included as a reusable deployment foundation. Consuming projects may extend the deployment setup for their target infrastructure without coupling the boilerplate itself to a specific hosting provider or backend service.
 
-### Docker
+## Git Workflow
 
-Build and deploy to production:
+The repository uses Husky, lint-staged, Commitlint, and Gitmoji conventional commits.
 
-```bash
-./deploy.sh --env prod
+Commit messages must follow the repository's configured convention. For example:
+
+```text
+📝 docs: update boilerplate documentation
+✨ feat: add reusable application capability
+🐛 fix: correct shared component behavior
 ```
 
-Build and deploy to development:
+Use feature, release, or hotfix branches as appropriate for the repository workflow rather than bypassing protected-branch hooks.
 
-```bash
-./deploy.sh --env dev
-```
+## Documentation
 
-Build and deploy to production with a custom version:
+- `README.md` describes the reusable boilerplate and contributor-facing setup.
+- `AGENTS.md` defines implementation and design-system rules for coding agents.
+- `CHANGELOG.md` records meaningful contributor-visible, architectural, operational, and user-visible changes.
+- `CLAUDE.md` may provide agent-specific entry-point guidance while `AGENTS.md` remains the canonical repository-wide instruction set.
 
-```bash
-./deploy.sh --env prod v1.2.0
-```
+## Using This Boilerplate
 
-Build and deploy without Docker cache:
+When starting a product from this repository:
 
-```bash
-./deploy.sh --env prod --no-cache
-```
+1. Create or copy the project from the boilerplate.
+2. Replace project metadata and branding.
+3. Define the project's CI colors and semantic design tokens.
+4. Add only the infrastructure required by that product, such as authentication, API, database, or deployment integrations.
+5. Add business features under `src/modules` and wire route entry points through `app/`.
+6. Update the product README and changelog so they describe the resulting application rather than the boilerplate.
 
-Build and deploy while keeping older images:
+Avoid adding speculative infrastructure to this repository merely because a future project might need it. The goal is a small, current, reusable foundation that can be extended deliberately.
 
-```bash
-./deploy.sh --env prod --keep
-```
+## Maintenance Principles
 
-Show deployment options:
+- Keep dependencies current and intentional.
+- Keep the boilerplate domain-neutral.
+- Prefer reusable foundations over example business features.
+- Avoid multiple competing patterns for the same concern.
+- Preserve readable, maintainable code over premature abstraction.
+- Keep documentation synchronized with meaningful architectural and workflow changes.
 
-```bash
-./deploy.sh --help
-```
-
-For Docker deployments, the application runs on port `3000` inside the container. `docker-compose.yml` exposes it through `PORT`.
-
-## Quality Checklist
-
-Before finishing UI work:
-
-- Existing shadcn-style primitives were checked first.
-- Existing navbar/sidebar/layout patterns were reused where possible.
-- Existing atom, molecule, and organism components were reused before adding new module-specific UI.
-- Tailwind utilities and existing CSS variables were preferred over inline styles.
-- Auth behavior was checked against the Frappe OAuth flow.
-- Stock module changes were checked against the current mock-backed table/filter workflow.
-- Responsive layout was checked for sidebar and main content changes.
-- `bun run lint` and `bun run check-types` pass, or known issues are explained.
-
-## Notes And Gaps
-
-- Sidebar modules other than Stock still need to be implemented.
-- The app currently uses cookie-stored OAuth tokens. Review cookie flags and backend expectations before hardening production auth.
-- The navbar should eventually render the authenticated user's real name or role from `UserProvider`.
-- Add `.env.example` once deployment values and naming are stable.
-- Add automated tests for module behavior and critical workflows.
+See `AGENTS.md` for the complete contributor and coding-agent rules.
